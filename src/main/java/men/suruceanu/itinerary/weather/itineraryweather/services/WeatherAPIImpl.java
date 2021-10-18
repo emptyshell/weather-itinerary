@@ -45,7 +45,7 @@ public class WeatherAPIImpl implements WeatherAPI {
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL).queryParam("appid", API_KEY)
-                .queryParamIfPresent("q", Optional.ofNullable(cityName))
+                .queryParamIfPresent("q", Optional.of(cityName.replaceAll(" ", "+")))
                 .queryParamIfPresent("units", Optional.ofNullable(units))
                 .queryParamIfPresent("lang", Optional.ofNullable(lang));
 
