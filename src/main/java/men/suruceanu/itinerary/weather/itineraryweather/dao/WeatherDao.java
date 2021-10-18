@@ -3,6 +3,7 @@ package men.suruceanu.itinerary.weather.itineraryweather.dao;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "weather")
@@ -27,10 +28,18 @@ public class WeatherDao {
     @Column(name = "clouds")
     private long clouds;
 
-    public WeatherDao(String cityName, String countryCode, double temperature, long clouds) {
+    @Column(name = "timestamp")
+    private LocalDateTime timestamp;
+
+    @Column(name = "added")
+    private LocalDateTime added;
+
+    public WeatherDao(String cityName, String countryCode, double temperature, long clouds, LocalDateTime timestamp) {
         this.cityName = cityName;
         this.countryCode = countryCode;
         this.temperature = temperature;
         this.clouds = clouds;
+        this.timestamp = timestamp;
+        this.added = LocalDateTime.now();
     }
 }

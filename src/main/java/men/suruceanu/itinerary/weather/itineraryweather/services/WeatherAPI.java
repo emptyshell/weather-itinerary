@@ -7,5 +7,6 @@ import java.util.List;
 public interface WeatherAPI {
 
     List<WeatherDao> fetch(String cityName, String units, String lang);
+    List<WeatherDao> get(String cityName);
 
 }

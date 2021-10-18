@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -31,6 +34,11 @@ public class WeatherAPIImpl implements WeatherAPI {
 
     @Override
     public List<WeatherDao> fetch(String cityName, String units, String lang) {
+
+        if (weatherRepo.existsByCityName(cityName)) {
+            return weatherRepo.findAllByCityName(cityName);
+        }
+
         HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -49,16 +57,38 @@ public class WeatherAPIImpl implements WeatherAPI {
 
         Objects.requireNonNull(weatherResponse).getList().forEach(weatherData -> {
             WeatherDao weatherDao = new WeatherDao(
-                    weatherResponse.getCity().getName(),
+                    cityName,
                     weatherResponse.getCod(),
                     weatherData.getMain().getTemp(),
-                    weatherData.getClouds().getAll());
+                    weatherData.getClouds().getAll(),
+                    LocalDateTime.ofInstant(Instant.ofEpochSecond(weatherData.getDt()), ZoneId.systemDefault())
+            );
 
             weatherDaoList.add(weatherDao);
-
-            weatherRepo.save(weatherDao);
+            if (weatherDao.getTimestamp().isAfter(
+                    LocalDateTime.of(
+                            weatherDao.getTimestamp().getYear(),
+                            weatherDao.getTimestamp().getMonth(),
+                            weatherDao.getTimestamp().getDayOfMonth(),
+                            11,
+                            59)
+            ) && weatherDao.getTimestamp().isBefore(
+                    LocalDateTime.of(
+                            weatherDao.getTimestamp().getYear(),
+                            weatherDao.getTimestamp().getMonth(),
+                            weatherDao.getTimestamp().getDayOfMonth(),
+                            18,
+                            1)
+            )) {
+                weatherRepo.save(weatherDao);
+            }
         });
 
         return weatherDaoList;
+    }
+
+    @Override
+    public List<WeatherDao> get(String cityName) {
+        return weatherRepo.findAllByCityName(cityName);
     }
 }
